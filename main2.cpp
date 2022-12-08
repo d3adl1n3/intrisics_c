@@ -80,8 +80,32 @@ void add_matrix(float** a, float** b, float** target, int size) {
     }
 }
 
-void sub_matrix() {}
-void sub_matrix_intrins() {}
+void sub_matrix(float** a, float** b, float** target, int size) {
+    for (int j=0; j<size; j++) {
+        for (int i=0; i<size; i++) {
+            int av = a[j][i];
+            int bv = b[j][i];
+            int c = av - bv;
+            target[i][j] = c;
+        }
+    }
+}
+
+void sub_matrix_intrins(float** a, float** b, float** target, int size) {
+    for(int j=0; j<size; j++) {
+        for(int i=0; i<size; i+=4) {
+            /* Load data into NEON register */
+            float32x4_t av = vld1q_f32(&(a[j][i]));
+            float32x4_t bv = vld1q_f32(&(b[j][i]));
+
+            /* Perform the addition */
+            int32x4_t targetv = vsubq_f32(av, bv);
+
+            /* Store the result */
+            vst1q_f32(&(target[i][j]), targetv);
+        }
+    }
+}
 
 void div_matrix() {}
 void div_matrix_intrins() {}
@@ -113,12 +137,14 @@ int main(int argc, const char * argv[]) {
     
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     add_matrix(a, b, res, N);
+    sub_matrix(a, b, res, N);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     printf("Time taken to calculate with intrinsics is %lf sec.\n", end.tv_sec-start.tv_sec + 0.000000001*(end.tv_nsec-start.tv_nsec));
     printf("%f\n", res[0][0]);
     
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     add_matrix_intrins(a, b, res, N);
+    sub_matrix_intrins(a, b, res, N);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     printf("Time taken to calculate with intrinsics is %lf sec.\n", end.tv_sec-start.tv_sec + 0.000000001*(end.tv_nsec-start.tv_nsec));
     printf("%f\n", res[0][0]);
