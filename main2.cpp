@@ -158,8 +158,13 @@ void mul_matrix_intrins(float** a, float** b, float** target, int size) {
     }
 }
 
-void calculate_T_matrix() {}
-void calculate_T_matrix_intrins() {}
+void transpose_matrix(float** a, float** target, int size) {
+    for (int j=0; j<size; j++) {
+        for (int i=0; i<size; i++) {
+            target[i][j] = a[j][i];
+        }
+    }
+}
 
 void calculate_B_matrix() {}
 void calculate_B_matrix_intrins() {}
@@ -185,6 +190,7 @@ int main(int argc, const char * argv[]) {
     sub_matrix(a, b, res, N);
     mul_matrix(a, b, res, N);
     div_matrix(a, b, res, N);
+    transpose_matrix(a, res, N);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     printf("Time taken to calculate with intrinsics is %lf sec.\n", end.tv_sec-start.tv_sec + 0.000000001*(end.tv_nsec-start.tv_nsec));
     printf("%f\n", res[0][0]);
